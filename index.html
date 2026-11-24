@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Studio v2.7</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #111317;
+            color: #f1f5f9;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 1180px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+            flex-shrink: 0;
+        }
+
+        .logo-mark svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .brand-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f8fafc;
+            letter-spacing: 0.2px;
+        }
+
+        .brand-title span {
+            color: #38bdf8;
+        }
+
+        .mode-tabs {
+            display: flex;
+            gap: 8px;
+            background: #1a1f26;
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid #28303d;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: #94a3b8;
+            padding: 8px 16px;
+            border-radius: 7px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .tab-btn.active {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .app-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            width: 100%;
+            max-width: 1180px;
+            background: #1a1f26;
+            padding: 20px;
+            border-radius: 14px;
+            border: 1px solid #28303d;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .preview-col {
+            flex: 2;
+            min-width: 280px;
+            background: #10141a;
+            border: 2px dashed #2d3748;
+            border-radius: 10px;
+            min-height: 440px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        #canvas, #collageCanvas {
+            display: none;
+            max-width: 100%;
+            max-height: 520px;
+            width: auto;
+            height: auto;
+            border-radius: 6px;
+            cursor: default;
+        }
+
+        #collageCanvas {
+            display: block;
+        }
+
+        .controls-col {
+            flex: 1;
+            min-width: 280px;
+            max-height: 590px;
+            overflow-y: auto;
+            padding-right: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .app-grid {
+                padding: 14px;
+                gap: 14px;
+            }
+
+            .preview-col {
+                min-height: 320px;
+            }
+
+            .controls-col {
+                max-height: none;
+                overflow-y: visible;
+                padding-right: 0;
+            }
+        }
+
+        .section-box {
+            background: #222933;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #2e3746;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #93c5fd;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .slider-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .slider-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: #38bdf8;
+            cursor: pointer;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #3b4658;
+            background: #161b22;
+            color: #f8fafc;
+            font-size: 13px;
+        }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .presets-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        button {
+            padding: 9px 12px;
+            border: none;
+            border-radius: 7px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .preset-btn {
+            background: #2d3748;
+            color: #f1f5f9;
+        }
+
+        .preset-btn:hover {
+            background: #3b485e;
+        }
+
+        .portrait-btn {
+            background: #0284c7;
+            color: #ffffff;
+            width: 100%;
+        }
+
+        .portrait-btn:hover {
+            background: #0369a1;
+        }
+
+        .upload-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: #2563eb;
+            color: #ffffff;
+            padding: 11px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .upload-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .file-info {
+            font-size: 12px;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: -6px;
+        }
+
+        .sr-file-input {
+            position: fixed;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+            left: -10px;
+            top: -10px;
+        }
+
+        .reset-btn {
+            background: #475569;
+            color: #ffffff;
+        }
+
+        .reset-btn:hover {
+            background: #64748b;
+        }
+
+        .share-btn {
+            background: #0ea5e9;
+            color: #ffffff;
+        }
+
+        .share-btn:hover {
+            background: #0284c7;
+        }
+
+        .download-btn {
+            background: #16a34a;
+            color: #ffffff;
+        }
+
+        .download-btn:hover {
+            background: #15803d;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slot-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slot-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #161b22;
+            border: 1px solid #3b4658;
+            padding: 8px 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #e2e8f0;
+        }
+
+        .slot-btn:hover {
+            border-color: #38bdf8;
+        }
+
+        .slot-status {
+            font-size: 11px;
+            color: #38bdf8;
+        }
+
+        .footer {
+            width: 100%;
+            max-width: 1180px;
+            margin-top: 16px;
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .footer strong {
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="brand-logo">
+            <div class="logo-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+                    <circle cx="12" cy="12" r="3.5"></circle>
+                    <path d="M17.5 6.5h.01"></path>
+                </svg>
+            </div>
+            <div class="brand-title">Photo<span>Studio</span></div>
+        </div>
+
+        <div class="mode-tabs">
+            <button type="button" class="tab-btn active" id="tabSingle" onclick="switchMode('single')">Single Photo & Crop</button>
+            <button type="button" class="tab-btn" id="tabCollage" onclick="switchMode('collage')">Collage Maker</button>
+        </div>
+    </div>
+
+    <!-- MODE 1: SINGLE PHOTO EDITOR -->
+    <div class="app-grid" id="singleView">
+        <div class="preview-col" id="previewDropZone" onclick="handlePreviewClick()">
+            <div class="placeholder" id="placeholder">
+                <strong>Photo එකක් upload කරන්න</strong><br>
+                මෙතන හෝ දකුණු පැත්තේ <strong>+ Upload Photo</strong> button එක click කරන්න
+            </div>
+            <canvas id="canvas" onclick="event.stopPropagation()"></canvas>
+        </div>
+
+        <div class="controls-col">
+            <button type="button" class="upload-btn" onclick="triggerUpload()">+ Upload Photo</button>
+            <input type="file" id="uploadInput" accept="image/*" class="sr-file-input">
+            <div class="file-info" id="fileInfo">No photo selected</div>
+
+            <!-- Crop & Portrait Section -->
+            <div class="section-box">
+                <div class="section-title">Crop, Portrait & Frame Ratio</div>
+                <button type="button" class="portrait-btn" onclick="setPortraitMode()">Portrait Mode (4:5)</button>
+                <select id="cropRatio">
+                    <option value="original">Original Size (No Crop)</option>
+                    <option value="4:5">4:5 — Portrait Mode</option>
+                    <option value="1:1">1:1 — Square (Instagram / DP)</option>
+                    <option value="16:9">16:9 — Landscape / YouTube</option>
+                    <option value="9:16">9:16 — Story / Status</option>
+                </select>
+
+                <div class="slider-item">
+                    <div class="slider-top"><span>Crop Zoom</span><span id="cropZoomVal">100%</span></div>
+                    <input type="range" id="cropZoom" min="100" max="250" value="100">
+                </div>
+
+                <div class="row-2">
+                    <div class="slider-item">
+                        <div class="slider-top"><span>Move X</span><span id="cropXVal">0%</span></div>
+                        <input type="range" id="cropX" min="-50" max="50" value="0">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-top"><span>Move Y</span><span id="cropYVal">0%</span></div>
+                        <input type="range" id="cropY" min="-50" max="50" value="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Presets -->
+            <div class="section-box">
+                <div class="section-title">Quick Presets</div>
+                <div class="presets-grid">
+                    <button type="button" class="preset-btn" onclick="applyPreset('bw')">B & W</button>
+                    <button type="button" class="preset-btn" onclick="applyPreset('moody')">Dark Moody</button>
+                    <button type="button" class="preset-btn" onclick="applyPreset('warm')">Warm</button>
+                    <button type="button" class="preset-btn" onclick="applyPreset('vivid')">Vivid</button>
+                </div>
+            </div>
+
+            <!-- Adjustments -->
+            <div class="section-box">
+                <div class="section-title">Color & Blur</div>
+
+                <div class="slider-item">
+                    <div class="slider-top"><span>Brightness</span><span id="brightnessVal">100%</span></div>
+                    <input type="range" id="brightness" min="0" max="200" value="100">
+                </div>
+
+                <div class="slider-item">
+                    <div class="slider-top"><span>Contrast</span><span id="contrastVal">100%</span></div>
+                    <input type="range" id="contrast" min="0" max="200" value="100">
+                </div>
+
+                <div class="slider-item">
+                    <div class="slider-top"><span>Saturation</span><span id="saturationVal">100%</span></div>
+                    <input type="range" id="saturation" min="0" max="200" value="100">
+                </div>
+
+                <div class="slider-item">
+                    <div class="slider-top"><span>Blur</span><span id="blurVal">0px</span></div>
+                    <input type="range" id="blur" min="0" max="10" value="0">
+                </div>
+            </div>
+
+            <!-- Border -->
+            <div class="section-box">
+                <div class="section-title">Border / Frame</div>
+                <div class="row-2">
+                    <select id="borderSize">
+                        <option value="0">No Border</option>
+                        <option value="20">Thin Border</option>
+                        <option value="45">Medium Border</option>
+                        <option value="80">Thick Border</option>
+                    </select>
+
+                    <select id="borderColor">
+                        <option value="#ffffff">White</option>
+                        <option value="#0f172a">Dark</option>
+                        <option value="#e2e8f0">Soft Grey</option>
+                        <option value="#1e293b">Slate</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Watermark -->
+            <div class="section-box">
+                <div class="section-title">Watermark / Text</div>
+                <input type="text" id="watermarkText" placeholder="උදා: @nirmalasahas">
+                <div class="row-2">
+                    <select id="watermarkPos">
+                        <option value="bottom-right">Bottom Right</option>
+                        <option value="bottom-left">Bottom Left</option>
+                        <option value="top-right">Top Right</option>
+                        <option value="top-left">Top Left</option>
+                    </select>
+
+                    <select id="watermarkOpacity">
+                        <option value="0.45">Soft (45%)</option>
+                        <option value="0.75">Medium (75%)</option>
+                        <option value="1">Solid (100%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Download Size & Format -->
+            <div class="section-box">
+                <div class="section-title">Download Size & Format</div>
+                <select id="downloadSize">
+                    <option value="original">Original Resolution (Full Size)</option>
+                    <option value="1920">High — Max 1920px</option>
+                    <option value="1080">Medium — Max 1080px</option>
+                    <option value="720">Small / Fast — Max 720px</option>
+                </select>
+
+                <select id="downloadFormat">
+                    <option value="image/png">PNG (High Quality)</option>
+                    <option value="image/jpeg">JPG (Smaller File Size)</option>
+                </select>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="reset-btn" onclick="resetAll()">Reset All</button>
+                <button type="button" class="share-btn" onclick="shareImage()">Share Photo</button>
+                <button type="button" class="download-btn" onclick="downloadImage()">Download Edited Photo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODE 2: COLLAGE MAKER -->
+    <div class="app-grid hidden" id="collageView">
+        <div class="preview-col" style="cursor: default;">
+            <canvas id="collageCanvas"></canvas>
+        </div>
+
+        <div class="controls-col">
+            <div class="section-box">
+                <div class="section-title">Collage Layout</div>
+                <select id="collageLayout">
+                    <option value="2-side">2 Photos — Side by Side</option>
+                    <option value="2-stack">2 Photos — Top & Bottom</option>
+                    <option value="3-grid">3 Photos — 1 Left + 2 Right</option>
+                    <option value="4-grid">4 Photos — 2x2 Grid</option>
+                </select>
+            </div>
+
+            <div class="section-box">
+                <div class="section-title">Select Photos</div>
+                <div class="slot-list" id="slotList"></div>
+            </div>
+
+            <div class="section-box">
+                <div class="section-title">Spacing & Frame Color</div>
+                <div class="slider-item">
+                    <div class="slider-top"><span>Gap / Border</span><span id="collageGapVal">16px</span></div>
+                    <input type="range" id="collageGap" min="0" max="50" value="16">
+                </div>
+
+                <select id="collageBg">
+                    <option value="#ffffff">White Background</option>
+                    <option value="#0f172a">Dark Background</option>
+                    <option value="#1e293b">Slate Background</option>
+                    <option value="#e2e8f0">Soft Grey Background</option>
+                </select>
+            </div>
+
+            <div class="section-box">
+                <div class="section-title">Collage Download Size</div>
+                <select id="collageSize">
+                    <option value="1080">Standard — 1080 x 1080 px</option>
+                    <option value="1600">High — 1600 x 1600 px</option>
+                    <option value="800">Small — 800 x 800 px</option>
+                </select>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="reset-btn" onclick="clearCollage()">Clear Collage</button>
+                <button type="button" class="download-btn" onclick="downloadCollage()">Download Collage</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Built by <strong>Nirmala Sahas</strong> • v2.7
+    </div>
+
+    <script>
+        function switchMode(mode) {
+            const singleView = document.getElementById('singleView');
+            const collageView = document.getElementById('collageView');
+            const tabSingle = document.getElementById('tabSingle');
+            const tabCollage = document.getElementById('tabCollage');
+
+            if (mode === 'single') {
+                singleView.classList.remove('hidden');
+                collageView.classList.add('hidden');
+                tabSingle.classList.add('active');
+                tabCollage.classList.remove('active');
+            } else {
+                singleView.classList.add('hidden');
+                collageView.classList.remove('hidden');
+                tabSingle.classList.remove('active');
+                tabCollage.classList.add('active');
+                renderCollage();
+            }
+        }
+
+        const uploadInput = document.getElementById('uploadInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const placeholder = document.getElementById('placeholder');
+
+        const cropRatio = document.getElementById('cropRatio');
+        const cropZoom = document.getElementById('cropZoom');
+        const cropX = document.getElementById('cropX');
+        const cropY = document.getElementById('cropY');
+
+        const brightness = document.getElementById('brightness');
+        const contrast = document.getElementById('contrast');
+        const saturation = document.getElementById('saturation');
+        const blur = document.getElementById('blur');
+
+        const borderSize = document.getElementById('borderSize');
+        const borderColor = document.getElementById('borderColor');
+
+        const watermarkText = document.getElementById('watermarkText');
+        const watermarkPos = document.getElementById('watermarkPos');
+        const watermarkOpacity = document.getElementById('watermarkOpacity');
+
+        const downloadSize = document.getElementById('downloadSize');
+        const downloadFormat = document.getElementById('downloadFormat');
+
+        let img = new Image();
+        let hasImage = false;
+        let baseFileName = 'edited-photo';
+
+        function triggerUpload() {
+            uploadInput.value = '';
+            uploadInput.click();
+        }
+
+        function handlePreviewClick() {
+            if (!hasImage) {
+                triggerUpload();
+            }
+        }
+
+        function setPortraitMode() {
+            cropRatio.value = '4:5';
+            renderEditor();
+        }
+
+        function loadFileIntoEditor(file) {
+            if (!file) return;
+            fileInfo.innerText = 'Loading: ' + file.name;
+            baseFileName = 'edited-' + file.name.replace(/\.[^/.]+$/, '');
+
+            const reader = new FileReader();
+            reader.onerror = () => {
+                fileInfo.innerText = 'Error reading file';
+            };
+            reader.onload = (event) => {
+                const loadedImg = new Image();
+                loadedImg.onerror = () => {
+                    fileInfo.innerText = 'Invalid image file';
+                };
+                loadedImg.onload = () => {
+                    img = loadedImg;
+                    hasImage = true;
+                    fileInfo.innerText = `${file.name} (${img.width}x${img.height})`;
+                    placeholder.style.display = 'none';
+                    canvas.style.display = 'block';
+                    renderEditor();
+                };
+                loadedImg.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        uploadInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            loadFileIntoEditor(file);
+        });
+
+        const previewDropZone = document.getElementById('previewDropZone');
+        previewDropZone.addEventListener('dragover', (e) => e.preventDefault());
+        previewDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) loadFileIntoEditor(file);
+        });
+
+        function getCropRect() {
+            const ratioVal = cropRatio.value;
+            let targetRatio = img.width / img.height;
+
+            if (ratioVal === '1:1') targetRatio = 1;
+            else if (ratioVal === '4:5') targetRatio = 4 / 5;
+            else if (ratioVal === '16:9') targetRatio = 16 / 9;
+            else if (ratioVal === '9:16') targetRatio = 9 / 16;
+
+            let baseW = img.width;
+            let baseH = img.height;
+
+            if (img.width / img.height > targetRatio) {
+                baseW = img.height * targetRatio;
+            } else {
+                baseH = img.width / targetRatio;
+            }
+
+            const zoomFactor = (parseInt(cropZoom.value, 10) || 100) / 100;
+            const sw = baseW / zoomFactor;
+            const sh = baseH / zoomFactor;
+
+            const maxOffsetX = (img.width - sw) / 2;
+            const maxOffsetY = (img.height - sh) / 2;
+
+            const panX = (parseInt(cropX.value, 10) || 0) / 50;
+            const panY = (parseInt(cropY.value, 10) || 0) / 50;
+
+            const sx = Math.max(0, Math.min(img.width - sw, (img.width - sw) / 2 + panX * maxOffsetX));
+            const sy = Math.max(0, Math.min(img.height - sh, (img.height - sh) / 2 + panY * maxOffsetY));
+
+            return {
+                sx,
+                sy,
+                sw,
+                sh,
+                outW: Math.round(baseW),
+                outH: Math.round(baseH)
+            };
+        }
+
+        function drawWatermark(text, pad) {
+            const fontSize = Math.max(18, Math.round(Math.min(canvas.width, canvas.height) * 0.032));
+            const margin = Math.max(16, Math.round(fontSize * 0.8)) + pad;
+
+            ctx.save();
+            ctx.font = `600 ${fontSize}px sans-serif`;
+            ctx.globalAlpha = parseFloat(watermarkOpacity.value) || 0.5;
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+            ctx.shadowBlur = 6;
+            ctx.shadowOffsetX = 1;
+            ctx.shadowOffsetY = 1;
+
+            const pos = watermarkPos.value;
+            if (pos.includes('left')) {
+                ctx.textAlign = 'left';
+                ctx.fillText(text, margin, pos.startsWith('top') ? margin + fontSize : canvas.height - margin);
+            } else {
+                ctx.textAlign = 'right';
+                ctx.fillText(text, canvas.width - margin, pos.startsWith('top') ? margin + fontSize : canvas.height - margin);
+            }
+            ctx.restore();
+        }
+
+        function renderEditor() {
+            document.getElementById('cropZoomVal').innerText = cropZoom.value + '%';
+            document.getElementById('cropXVal').innerText = cropX.value + '%';
+            document.getElementById('cropYVal').innerText = cropY.value + '%';
+
+            document.getElementById('brightnessVal').innerText = brightness.value + '%';
+            document.getElementById('contrastVal').innerText = contrast.value + '%';
+            document.getElementById('saturationVal').innerText = saturation.value + '%';
+            document.getElementById('blurVal').innerText = blur.value + 'px';
+
+            if (!hasImage) return;
+
+            const crop = getCropRect();
+            const pad = parseInt(borderSize.value, 10) || 0;
+            const totalW = crop.outW + pad * 2;
+            const totalH = crop.outH + pad * 2;
+
+            canvas.width = totalW;
+            canvas.height = totalH;
+
+            ctx.save();
+            ctx.filter = 'none';
+            ctx.clearRect(0, 0, totalW, totalH);
+
+            if (pad > 0) {
+                ctx.fillStyle = borderColor.value;
+                ctx.fillRect(0, 0, totalW, totalH);
+            }
+
+            ctx.filter = `brightness(${brightness.value}%) contrast(${contrast.value}%) saturate(${saturation.value}%) blur(${blur.value}px)`;
+            ctx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, pad, pad, crop.outW, crop.outH);
+            ctx.restore();
+
+            const text = watermarkText.value.trim();
+            if (text.length > 0) {
+                drawWatermark(text, pad);
+            }
+        }
+
+        [
+            cropRatio, cropZoom, cropX, cropY,
+            brightness, contrast, saturation, blur,
+            borderSize, borderColor, watermarkText, watermarkPos, watermarkOpacity
+        ].forEach(el => {
+            el.addEventListener('input', renderEditor);
+            el.addEventListener('change', renderEditor);
+        });
+
+        function applyPreset(type) {
+            if (type === 'bw') {
+                brightness.value = 105; contrast.value = 120; saturation.value = 0; blur.value = 0;
+            } else if (type === 'moody') {
+                brightness.value = 85; contrast.value = 130; saturation.value = 80; blur.value = 0;
+            } else if (type === 'warm') {
+                brightness.value = 108; contrast.value = 105; saturation.value = 135; blur.value = 0;
+            } else if (type === 'vivid') {
+                brightness.value = 105; contrast.value = 125; saturation.value = 150; blur.value = 0;
+            }
+            renderEditor();
+        }
+
+        function resetAll() {
+            cropRatio.value = 'original';
+            cropZoom.value = 100;
+            cropX.value = 0;
+            cropY.value = 0;
+            brightness.value = 100;
+            contrast.value = 100;
+            saturation.value = 100;
+            blur.value = 0;
+            borderSize.value = '0';
+            borderColor.value = '#ffffff';
+            watermarkText.value = '';
+            watermarkPos.value = 'bottom-right';
+            watermarkOpacity.value = '0.45';
+            renderEditor();
+        }
+
+        function buildExportCanvasAndMeta() {
+            const maxDimVal = downloadSize.value;
+            let exportW = canvas.width;
+            let exportH = canvas.height;
+
+            if (maxDimVal !== 'original') {
+                const maxSide = parseInt(maxDimVal, 10);
+                const largest = Math.max(exportW, exportH);
+                if (largest > maxSide) {
+                    const scale = maxSide / largest;
+                    exportW = Math.round(exportW * scale);
+                    exportH = Math.round(exportH * scale);
+                }
+            }
+
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = exportW;
+            exportCanvas.height = exportH;
+            const exportCtx = exportCanvas.getContext('2d');
+            exportCtx.drawImage(canvas, 0, 0, exportW, exportH);
+
+            const mime = downloadFormat.value;
+            const ext = mime === 'image/jpeg' ? 'jpg' : 'png';
+            const quality = mime === 'image/jpeg' ? 0.92 : undefined;
+            const fileName = `${baseFileName}-${exportW}x${exportH}.${ext}`;
+
+            return { exportCanvas, mime, ext, quality, fileName };
+        }
+
+        function downloadImage() {
+            if (!hasImage) {
+                alert('කරුණාකර මුලින්ම photo එකක් upload කරන්න!');
+                return;
+            }
+
+            const { exportCanvas, mime, quality, fileName } = buildExportCanvasAndMeta();
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = exportCanvas.toDataURL(mime, quality);
+            link.click();
+        }
+
+        async function shareImage() {
+            if (!hasImage) {
+                alert('කරුණාකර මුලින්ම photo එකක් upload කරන්න!');
+                return;
+            }
+
+            const { exportCanvas, mime, quality, fileName } = buildExportCanvasAndMeta();
+
+            exportCanvas.toBlob(async (blob) => {
+                if (!blob) {
+                    downloadImage();
+                    return;
+                }
+
+                const file = new File([blob], fileName, { type: mime });
+
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            title: 'Photo Studio',
+                            files: [file]
+                        });
+                        return;
+                    } catch (err) {
+                        if (err && err.name === 'AbortError') return;
+                    }
+                }
+
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+                alert('මෙම browser එක direct share support කරන්නේ නැහැ — photo එක download වුණා. Download folder එකෙන් share කරන්න.');
+            }, mime, quality);
+        }
+
+        // --- COLLAGE MAKER ---
+        const collageCanvas = document.getElementById('collageCanvas');
+        const collageCtx = collageCanvas.getContext('2d');
+        const collageLayout = document.getElementById('collageLayout');
+        const collageGap = document.getElementById('collageGap');
+        const collageBg = document.getElementById('collageBg');
+        const collageSize = document.getElementById('collageSize');
+        const slotList = document.getElementById('slotList');
+
+        let collageImages = [null, null, null, null];
+
+        function getRequiredSlots() {
+            const val = collageLayout.value;
+            if (val.startsWith('2')) return 2;
+            if (val.startsWith('3')) return 3;
+            return 4;
+        }
+
+        function buildCollageSlots() {
+            const count = getRequiredSlots();
+            slotList.innerHTML = '';
+
+            for (let i = 0; i < count; i++) {
+                const row = document.createElement('div');
+                row.className = 'slot-btn';
+
+                const title = document.createElement('span');
+                title.innerText = `Photo ${i + 1}`;
+
+                const status = document.createElement('span');
+                status.className = 'slot-status';
+                status.innerText = collageImages[i] ? 'Uploaded ✓' : '+ Choose';
+
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.className = 'sr-file-input';
+
+                row.addEventListener('click', () => {
+                    input.value = '';
+                    input.click();
+                });
+
+                input.addEventListener('change', (e) => {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const cImg = new Image();
+                        cImg.onload = () => {
+                            collageImages[i] = cImg;
+                            buildCollageSlots();
+                            renderCollage();
+                        };
+                        cImg.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                row.appendChild(title);
+                row.appendChild(status);
+                row.appendChild(input);
+                slotList.appendChild(row);
+            }
+        }
+
+        function drawImageCover(targetCtx, imageObj, dx, dy, dw, dh, index) {
+            if (!imageObj) {
+                targetCtx.fillStyle = '#1e293b';
+                targetCtx.fillRect(dx, dy, dw, dh);
+                targetCtx.fillStyle = '#94a3b8';
+                targetCtx.font = '600 22px sans-serif';
+                targetCtx.textAlign = 'center';
+                targetCtx.textBaseline = 'middle';
+                targetCtx.fillText(`Photo ${index + 1}`, dx + dw / 2, dy + dh / 2);
+                return;
+            }
+
+            const imgRatio = imageObj.width / imageObj.height;
+            const boxRatio = dw / dh;
+            let sx = 0, sy = 0, sw = imageObj.width, sh = imageObj.height;
+
+            if (imgRatio > boxRatio) {
+                sw = imageObj.height * boxRatio;
+                sx = (imageObj.width - sw) / 2;
+            } else {
+                sh = imageObj.width / boxRatio;
+                sy = (imageObj.height - sh) / 2;
+            }
+
+            targetCtx.drawImage(imageObj, sx, sy, sw, sh, dx, dy, dw, dh);
+        }
+
+        function renderCollage() {
+            const gap = parseInt(collageGap.value, 10) || 0;
+            document.getElementById('collageGapVal').innerText = gap + 'px';
+
+            const size = parseInt(collageSize.value, 10) || 1080;
+            collageCanvas.width = size;
+            collageCanvas.height = size;
+
+            collageCtx.fillStyle = collageBg.value;
+            collageCtx.fillRect(0, 0, size, size);
+
+            const layout = collageLayout.value;
+
+            if (layout === '2-side') {
+                const w = (size - gap * 3) / 2;
+                const h = size - gap * 2;
+                drawImageCover(collageCtx, collageImages[0], gap, gap, w, h, 0);
+                drawImageCover(collageCtx, collageImages[1], gap * 2 + w, gap, w, h, 1);
+            } else if (layout === '2-stack') {
+                const w = size - gap * 2;
+                const h = (size - gap * 3) / 2;
+                drawImageCover(collageCtx, collageImages[0], gap, gap, w, h, 0);
+                drawImageCover(collageCtx, collageImages[1], gap, gap * 2 + h, w, h, 1);
+            } else if (layout === '3-grid') {
+                const w = (size - gap * 3) / 2;
+                const leftH = size - gap * 2;
+                const rightH = (size - gap * 3) / 2;
+                drawImageCover(collageCtx, collageImages[0], gap, gap, w, leftH, 0);
+                drawImageCover(collageCtx, collageImages[1], gap * 2 + w, gap, w, rightH, 1);
+                drawImageCover(collageCtx, collageImages[2], gap * 2 + w, gap * 2 + rightH, w, rightH, 2);
+            } else if (layout === '4-grid') {
+                const w = (size - gap * 3) / 2;
+                const h = (size - gap * 3) / 2;
+                drawImageCover(collageCtx, collageImages[0], gap, gap, w, h, 0);
+                drawImageCover(collageCtx, collageImages[1], gap * 2 + w, gap, w, h, 1);
+                drawImageCover(collageCtx, collageImages[2], gap, gap * 2 + h, w, h, 2);
+                drawImageCover(collageCtx, collageImages[3], gap * 2 + w, gap * 2 + h, w, h, 3);
+            }
+        }
+
+        function clearCollage() {
+            collageImages = [null, null, null, null];
+            buildCollageSlots();
+            renderCollage();
+        }
+
+        function downloadCollage() {
+            const count = getRequiredSlots();
+            const hasAny = collageImages.slice(0, count).some(item => item !== null);
+            if (!hasAny) {
+                alert('කරුණාකර collage එකට අඩුම තරමේ photo එකක්වත් add කරන්න!');
+                return;
+            }
+            const link = document.createElement('a');
+            link.download = `collage-${collageCanvas.width}x${collageCanvas.height}.png`;
+            link.href = collageCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        collageLayout.addEventListener('change', () => {
+            buildCollageSlots();
+            renderCollage();
+        });
+        collageGap.addEventListener('input', renderCollage);
+        collageBg.addEventListener('change', renderCollage);
+        collageSize.addEventListener('change', renderCollage);
+
+        buildCollageSlots();
+        renderCollage();
+    </script>
+</body>
+</html>
